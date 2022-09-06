@@ -99,7 +99,7 @@ namespace gscam {
 
     // Get TF Frame
     if(!nh_private_.getParam("frame_id",frame_id_)){
-      frame_id_ = "/camera_frame";
+      frame_id_ = "camera_frame"; // sometimes rviz complain
       ROS_WARN_STREAM("No camera frame_id set, using frame \""<<frame_id_<<"\".");
       nh_private_.setParam("frame_id",frame_id_);
     }
@@ -391,6 +391,7 @@ namespace gscam {
 #if (GST_VERSION_MAJOR == 1)
         gst_memory_unmap(memory, &info);
         gst_memory_unref(memory);
+        gst_sample_unref(sample);
 #endif
         gst_buffer_unref(buf);
       }
