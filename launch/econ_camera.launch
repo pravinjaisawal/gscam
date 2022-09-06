@@ -1,0 +1,29 @@
+<launch>
+  <!-- Command Line Arguments -->
+  <arg name="sensor_id" default="0" />                       <!-- The sensor id of the camera -->
+  <arg name="cam_name" default="econ_$(arg sensor_id)" /> <!-- The name of the camera (corrsponding to the camera info) -->
+  <arg name="frame_id" default="/$(arg cam_name)_link" />    <!-- The TF frame ID. -->
+  <arg name="sync_sink" default="false" />                   <!-- Synchronize the app sink. Setting this to false may resolve problems with sub-par framerates. -->
+  <arg name="width" default="1920" />                        <!-- Image Width -->
+  <arg name="height" default="1080" />                       <!-- Image Height -->
+  <arg name="fps" default="60" />                             <!-- Desired framerate. True framerate may not reach this if set too high. -->
+  <arg name="image_encoding" default="jpeg" />               <!-- Image encoding (jpeg, rgb8, mono8) -->
+
+  <!-- Make arguments available to parameter server -->
+  <param name="$(arg cam_name)/camera_id" type="int" value="$(arg sensor_id)" />
+  <param name="$(arg cam_name)/image_width" type="int" value="$(arg width)" />
+  <param name="$(arg cam_name)/image_height" type="int" value="$(arg height)" />
+  <param name="$(arg cam_name)/target_fps" type="int" value="$(arg fps)" />
+
+  <env name="GSCAM_CONFIG" value="v4l2src device=/dev/video$(arg sensor_id) do-timestamp=true ! image/jpeg, width=$(arg width), height=$(arg height), framerate=$(arg fps)/1 ! jpegparse ! videorate"/>
+  <node pkg="gscam" type="gscam" name="$(arg cam_name)" output="screen">
+    <param name="camera_name" value="$(arg cam_name)" />
+    <param name="use_gst_timestamps" value="true"/>
+    <param name="frame_id" value="$(arg frame_id)" />
+    <param name="sync_sink" value="$(arg sync_sink)" />
+    <param name="image_encoding" value="$(arg image_encoding)"/>
+    <remap from="camera/image_raw" to="$(arg cam_name)/image_raw" />
+    <remap from="camera/image_raw/compressed" to="$(arg cam_name)/image_raw/compressed" />
+    <remap from="/set_camera_info" to="$(arg cam_name)/set_camera_info" />
+  </node>
+</launch>
